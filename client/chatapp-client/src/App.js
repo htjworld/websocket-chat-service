@@ -3,19 +3,22 @@ import "./App.css";
 import socket from "./server";
 
 function App() {
+  const [user, setUser] = useState(null);
 
-  const askUserName=()=>{
-    useEffect(()=>{ // 틀자마자 실행
-      askUserName()
-    },[])
+  useEffect(() => {
+    // 틀자마자 실행
+    askUserName();
+  }, []);
+  const askUserName = () => {
     const userName = prompt("당신의 이름을 입력하세요");
-    console.log("uuu",userName)
+    console.log("uuu", userName);
 
-    socket.emit("login",userName,(res)=>{
-        console.log("Res",res);
-        
-    })
-  }
+    socket.emit("login", userName, (res) => {
+      if(res?.ok){
+        setUser(res.data)
+      }
+    });
+  };
   return (
     <div>
       <div className="App"></div>
