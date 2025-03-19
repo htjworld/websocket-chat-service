@@ -2,18 +2,23 @@ import { useEffect, useState } from "react";
 import "./App.css";
 import socket from "./server";
 import InputField from "./components/InputField/InputField";
+import MessageContainer from "./components/MessageContainer/MessageContainer";
 
 function App() {
   const [user, setUser] = useState(null);
   const [message, setMessage] = useState("");
+  const [messageList, setMessageList] = useState([]);
+  console.log("message List", messageList);
 
   useEffect(() => {
+    socket.on("message", (message) => {
+      setMessageList((prevState) => prevState.concat(message));
+    });
     // 틀자마자 실행
     askUserName();
   }, []);
   const askUserName = () => {
     const userName = prompt("당신의 이름을 입력하세요");
-    console.log("uuu", userName);
 
     socket.emit("login", userName, (res) => {
       if (res?.ok) {
@@ -30,6 +35,7 @@ function App() {
   return (
     <div>
       <div className="App">
+        <MessageContainer messageList={messageList} user={user} />
         <InputField
           message={message}
           setMessage={setMessage}
