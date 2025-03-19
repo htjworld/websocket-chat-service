@@ -6,12 +6,13 @@ import MessageContainer from "./components/MessageContainer/MessageContainer";
 
 function App() {
   const [user, setUser] = useState(null);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
   const [messageList, setMessageList] = useState([]);
   console.log("message List", messageList);
 
   useEffect(() => {
     socket.on("message", (message) => {
+      console.log("res", message);
       setMessageList((prevState) => prevState.concat(message));
     });
     // 틀자마자 실행

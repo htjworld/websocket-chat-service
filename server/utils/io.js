@@ -1,6 +1,7 @@
 const chatController = require("../Controllers/chat.controller");
 const userController = require("../Controllers/user.controller");
 const chat = require("../Models/chat");
+const user = require("../Models/user");
 
 module.exports = function (io) {
   //io~~ => emit:듣는것, on:말하기
@@ -12,13 +13,13 @@ module.exports = function (io) {
       try {
         const user = await userController.saveUser(userName, socket.id);
         const welcomeMessage = {
-          chat: "${user.name} is joined to this room",
+          chat: `${user.name} is joined to this room`,
           user: { id: null, name: "system" },
         };
         io.emit("message", welcomeMessage);
         cb({ ok: true, data: user });
       } catch (error) {
-        cb({ ok: false, error: error.message });
+        cb({ ok: false, error: error.message });        
       }
     });
 
