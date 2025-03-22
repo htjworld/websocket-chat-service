@@ -2,10 +2,14 @@ const chatController = require("../Controllers/chat.controller");
 const userController = require("../Controllers/user.controller");
 const chat = require("../Models/chat");
 const user = require("../Models/user");
+const roomController = require("../Controllers/room.controller");
+
 
 module.exports = function (io) {
   //io~~ => emit:듣는것, on:말하기
   io.on("connection", async (socket) => {
+    socket.emit("rooms", await roomController.getAllRooms()); // 룸 리스트 보내기
+
     console.log("client is connected", socket.id);
 
     socket.on("login", async (userName, cb) => {
