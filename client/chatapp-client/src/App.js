@@ -4,10 +4,16 @@ import socket from "./server";
 import InputField from "./components/InputField/InputField";
 import MessageContainer from "./components/MessageContainer/MessageContainer";
 
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import RoomListPage from "./pages/RoomListPage/RoomListPage";
+import ChatPage from "./pages/ChatPage/ChatPage";
+
 function App() {
   const [user, setUser] = useState(null);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [messageList, setMessageList] = useState([]);
+  const [rooms, setRooms] = useState([]);
+
   console.log("message List", messageList);
 
   useEffect(() => {
@@ -17,6 +23,10 @@ function App() {
     });
     // 틀자마자 실행
     askUserName();
+    // useEffect 안에 추가
+    socket.on("rooms", (res) => {
+      setRooms(res);
+    });
   }, []);
   const askUserName = () => {
     const userName = prompt("당신의 이름을 입력하세요");
@@ -33,17 +43,25 @@ function App() {
       console.log("sendMessage res", res);
     });
   };
+  // return (
+  //   <div>
+  //     <div className="App">
+  //       <MessageContainer messageList={messageList} user={user} />
+  //       <InputField
+  //         message={message}
+  //         setMessage={setMessage}
+  //         sendMessage={sendMessage}
+  //       />
+  //     </div>
+  //   </div>
+  // );
   return (
-    <div>
-      <div className="App">
-        <MessageContainer messageList={messageList} user={user} />
-        <InputField
-          message={message}
-          setMessage={setMessage}
-          sendMessage={sendMessage}
-        />
-      </div>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route exact path="/" element={<RoomListPage rooms={rooms} />} />
+        <Route exact path="/room/:id" element={<ChatPage user={user} />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
