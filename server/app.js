@@ -13,6 +13,7 @@ mongoose
   })
   .then(() => console.log("connected to database"));
 
+//임의의 room
 app.get("/", async (req, res) => {
   Room.insertMany([
     {

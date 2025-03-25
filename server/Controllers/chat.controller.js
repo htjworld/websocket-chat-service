@@ -7,7 +7,8 @@ chatController.saveChat = async(message, user)=>{
         user:{
             id:user._id,
             name:user.name,
-        }
+        },
+        room: user.room, // 메세지에 채팅방 정보도 저장하는 부분 추가!
     })
     await newMessage.save();
     return newMessage;
