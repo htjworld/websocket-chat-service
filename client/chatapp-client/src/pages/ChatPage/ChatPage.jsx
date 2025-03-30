@@ -17,20 +17,35 @@ const ChatPage = ({user}) => {
 
     
     useEffect(() => {
-      socket.on("message", (res) => {
-        console.log("message",res)
-        setMessageList((prevState) => prevState.concat(res));
-      });
       socket.emit("joinRoom",id,(res)=>{
         if(res && res.ok){
             console.log("successfully join",res)
+            // 기존 메시지 받아오기
+            socket.emit("getRoomChats", id, (res) => {
+              console.log("📦 getRoomChats 응답:", res);
+
+              if (res.ok) {
+                setMessageList(res.chats);
+              } else {
+                console.error("Failed to fetch previous messages:", res.message);
+              }
+            });
         }
         else{
             console.log("fail to join",res)
         }
       })
+      
 
-    }, []);
+      socket.on("message", (res) => {
+        setMessageList((prevState) => prevState.concat(res));
+      });
+      
+      // 클린업 (중복 방지)
+      return () => {
+        socket.off("message");
+      };
+    }, [id]);
   
     const sendMessage = (event) => {
       event.preventDefault();

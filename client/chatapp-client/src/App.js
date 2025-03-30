@@ -27,7 +27,6 @@ function App() {
     askUserName();
     // useEffect 안에 추가
     socket.on("rooms", (res) => {
-      console.log("rooms from socket",res);
       setRooms(res);
     });
   }, []);
