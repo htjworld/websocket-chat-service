@@ -1,0 +1,11 @@
+/* CreateRoomButton.css */
+.create-room-button {
+    padding: 10px 15px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    font-size: 14px;
+  }

@@ -1,0 +1,36 @@
+/* CreateRoomPageStyle.css */
+
+.create-room-container {
+    max-width: 400px;
+    margin: 100px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    background-color: #f9f9f9;
+    text-align: center;
+  }
+  
+  .create-room-container h2 {
+    margin-bottom: 20px;
+  }
+  
+  .create-room-container input {
+    width: 80%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+  
+  .create-room-container button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  .create-room-container button:hover {
+    background-color: #0056b3;
+  }

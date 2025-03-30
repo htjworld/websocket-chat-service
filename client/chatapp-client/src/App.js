@@ -7,6 +7,8 @@ import MessageContainer from "./components/MessageContainer/MessageContainer";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import RoomListPage from "./pages/RoomListPage/RoomListPage";
 import ChatPage from "./pages/ChatPage/ChatPage";
+import CreateRoomPage from "./pages/CreateRoomPage/CreateRoomPage";
+
 
 function App() {
   const [user, setUser] = useState(null);
@@ -25,6 +27,7 @@ function App() {
     askUserName();
     // useEffect 안에 추가
     socket.on("rooms", (res) => {
+      console.log("rooms from socket",res);
       setRooms(res);
     });
   }, []);
@@ -60,6 +63,7 @@ function App() {
       <Routes>
         <Route exact path="/" element={<RoomListPage rooms={rooms} />} />
         <Route exact path="/room/:id" element={<ChatPage user={user} />} />
+        <Route exact path="/create-room" element={<CreateRoomPage user={user} />} />
       </Routes>
     </BrowserRouter>
   );

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import socket from "../../server";
 import { useNavigate } from "react-router-dom";
-import "./RoomListPageStyle.css";
+import "./RoomListPage.css";
+import CreateRoomButton from "../../components/CreateRoomButton/CreateRoomButton";
 
 const RoomListPage = ({rooms}) => {
   
@@ -15,6 +16,8 @@ const RoomListPage = ({rooms}) => {
     <div className="room-body">
       <div className="room-nav">채팅 ▼</div>
 
+      <CreateRoomButton onClick={() => navigate("/create-room")} />
+
       {rooms.length > 0
         ? rooms.map((room) => (
             <div
@@ -26,7 +29,7 @@ const RoomListPage = ({rooms}) => {
                 <img src="/profile.jpeg" />
                 <p>{room.room}</p>
               </div>
-              <div className="member-number">{room.members.length}</div>
+              <div className="member-number">{room.members ? room.members.length : 0}</div>
             </div>
           ))
         : null}
