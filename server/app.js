@@ -3,8 +3,12 @@ const mongoose = require("mongoose");
 require("dotenv").config();
 const cors = require("cors");
 const Room = require("./Models/room");
+const roomRouter = require("./routes/roomRouter");
+
 const app = express();
 app.use(cors());
+app.use(express.json());
+app.use("/api/room", roomRouter);
 
 mongoose
   .connect(process.env.DB, {
@@ -16,16 +20,12 @@ mongoose
 //임의의 room
 app.get("/", async (req, res) => {
   try {
-    const rooms = await Room.find({});
-    if (rooms.length === 0) {
-      await Room.insertMany([
-        { room: "자바스크립트 단톡방", members: [] },
-        { room: "리액트 단톡방", members: [] },
-        { room: "NodeJS 단톡방", members: [] },
-      ]);
-      return res.send("room created");
+    const existing = await Room.findOne({room : "전체 공지 방"});
+    if (!existing) {
+      await Room.create({ room: "전체 공지 방", members: [] });
+      return res.send("전체 공지 방 created");
     } else {
-      return res.send("rooms already exist");
+      return res.send("전체 공지 방 already exists");
     }
   } catch (error) {
     return res.status(500).send(error.message);

@@ -1,7 +1,7 @@
 const chatController = require("../Controllers/chat.controller");
 const userController = require("../Controllers/user.controller");
-const chat = require("../Models/chat");
-const user = require("../Models/user");
+const Chat = require("../Models/chat");
+const User = require("../Models/user");
 const roomController = require("../Controllers/room.controller");
 
 
@@ -16,6 +16,8 @@ module.exports = function (io) {
       //유저 정보를 저장
       try {
         const user = await userController.saveUser(userName, socket.id);
+        const userRooms = await roomController.getUserRooms(user._id);
+        socket.emit("rooms", userRooms);
         cb({ ok: true, data: user });
       } catch (error) {
         cb({ ok: false, error: error.message });        
@@ -42,19 +44,31 @@ module.exports = function (io) {
       }
     });
 
+    socket.on("getRooms", async () => {
+      try {
+        const user = await userController.checkUser(socket.id);
+        const userRooms = await roomController.getUserRooms(user._id); // 유저가 속한 방만 가져오기
+        socket.emit("rooms", userRooms); // 다시 프론트에 방 목록 전송
+      } catch (error) {
+        console.error("getRooms error:", error.message);
+      }
+    });
+
 
     socket.on("sendMessage", async (message, cb) => {
       try {
         // 유저 찾기(socket.id로)
         const user = await userController.checkUser(socket.id);
         // 메세지 저장
-        const newMessage = await chatController.saveChat(message, user);
         const roomId = socket.currentRoom; // socket이 기억하고 있는 현재 방
+
         if (!roomId) throw new Error("현재 참여 중인 방이 없습니다.");
 
+        const newMessage = await chatController.saveChat(message, user, roomId);
         io.to(roomId).emit("message", newMessage); // 그 방에만 메시지 전달
         cb({ ok: true });
       } catch (error) {
+        console.error("sendMessage 에러:", error.message);
         cb({ ok: false, error: error.message });
       }
     });
@@ -73,6 +87,32 @@ module.exports = function (io) {
         cb({ ok: true });
       } catch (error) {
         cb({ ok: false, message: error.message });
+      }
+    });
+
+    socket.on("getRoomChats", async (roomId, cb) => {
+      try {
+        const user = await userController.checkUser(socket.id);
+        // 유저가 언제 이 방에 들어왔는지 찾기
+        const roomInfo = user.joinedRooms.find(
+          (r) => r.room.toString() === roomId.toString()
+        );
+
+        if (!roomInfo) {
+          return cb({ ok: false, message: "유저가 이 방에 참여하지 않았습니다." });
+        }
+
+        const joinedAt = roomInfo.joinedAt;
+
+        // 입장 시점 이후의 메시지만 조회
+        const chats = await Chat.find({
+          room: roomId,
+          createdAt: { $gte: joinedAt },
+        }).sort({ createdAt: 1 });
+
+        cb({ ok: true, chats });
+      } catch (err) {
+        cb({ ok: false, message: err.message });
       }
     });
 
