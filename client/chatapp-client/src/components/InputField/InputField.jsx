@@ -15,6 +15,7 @@ const InputField = ({message,setMessage,sendMessage}) => {
               multiline={false}
               rows={1}
             />
+            
 
             <Button
               disabled={message === ""}

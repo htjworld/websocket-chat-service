@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import socket from "../../server";
 import "./CreateRoomPage.css";
 
 const CreateRoomPage = ({ user }) => {
@@ -16,6 +17,7 @@ const CreateRoomPage = ({ user }) => {
       });
       if (res.data?.ok) {
         alert("방이 생성되었습니다.");
+        socket.emit("getRooms");
         navigate("/");
       }
     } catch (err) {
