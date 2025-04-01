@@ -62,12 +62,15 @@ const ChatPage = ({user}) => {
           if(res.ok) navigate("/") // 다시 채팅방 리스트 페이지로 돌아감
       })
     }
+    const backToList = () => {
+      navigate("/"); // 방 나가진 않음, 단순히 이동
+    };
 
     return (
       <div>
         <div className="App">
             <nav>
-              <Button onClick={leaveRoom}className='back-button'>←</Button>
+              <Button onClick={backToList}className='back-button'>←</Button>
               <div className='nav-user'>{user.name}</div>
             </nav>
           <div>
