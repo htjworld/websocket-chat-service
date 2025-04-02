@@ -80,18 +80,24 @@ roomController.leaveRoom = async (userId, roomId) => {
   if (!room) {
     throw new Error("Room not found");
   }
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new Error("User not found");
+  }
+
   room.members = room.members.filter(
     (memberId) => memberId.toString() !== userId.toString()
   );
   await room.save();
-  const user = await User.findById(userId);
+
   user.joinedRooms = user.joinedRooms.filter(
     (entry) => entry.room.toString() !== roomId.toString()
   );
   user.adminRooms = user.adminRooms.filter(
-    (r) => r.toString() !== roomId.toString()
+    (adminRoomId) => adminRoomId.toString() !== roomId.toString()
   );
   await user.save();
+  console.log(`🚪 ${user.name}(${userId}) left room '${room.room}' (${roomId})`);
 };
 
 module.exports = roomController;

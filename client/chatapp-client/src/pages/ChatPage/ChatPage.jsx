@@ -77,7 +77,9 @@ const ChatPage = ({ user }) => {
       // 서버에서 userController.checkUser(socket.id) , socket.currentRoom 
       // 기반으로 유저와 방을 탐색
       if (res.ok) {
-        navigate("/"); // 방 리스트로 이동
+        socket.emit("getRooms", null, () => {
+          navigate("/");
+        });
       } else {
         console.log("hi");
         
@@ -88,7 +90,9 @@ const ChatPage = ({ user }) => {
   };
 
   const backToList = () => {
-    navigate("/"); // 방 나가진 않음, 단순히 이동
+    socket.emit("getRooms", null, () => {
+      navigate("/");
+    });
   };
 
   return (
