@@ -69,14 +69,29 @@ roomController.joinRoom = async (roomId, user) => {
     await user.save();
   }
 };
+roomController.getRoomMembers = async (roomId) => {
+  const room = await Room.findById(roomId).populate("members", "name _id");
+  if (!room) throw new Error("Room not found");
+  return room.members;
+};
 
-roomController.leaveRoom = async (user) => {
-  const room = await Room.findById(user.room);
+roomController.leaveRoom = async (userId, roomId) => {
+  const room = await Room.findById(roomId);
   if (!room) {
     throw new Error("Room not found");
   }
-  room.members.remove(user._id);
+  room.members = room.members.filter(
+    (memberId) => memberId.toString() !== userId.toString()
+  );
   await room.save();
+  const user = await User.findById(userId);
+  user.joinedRooms = user.joinedRooms.filter(
+    (entry) => entry.room.toString() !== roomId.toString()
+  );
+  user.adminRooms = user.adminRooms.filter(
+    (r) => r.toString() !== roomId.toString()
+  );
+  await user.save();
 };
 
 module.exports = roomController;
