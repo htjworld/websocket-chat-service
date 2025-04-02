@@ -88,6 +88,14 @@ roomController.leaveRoom = async (userId, roomId) => {
   room.members = room.members.filter(
     (memberId) => memberId.toString() !== userId.toString()
   );
+  
+  if (room.admin?.toString() === userId.toString()) {
+    if (room.members.length > 0) {
+      room.admin = room.members[0]; // 가장 먼저 있는 사람에게 넘기기
+    } else {
+      room.admin = null; // 아예 아무도 없으면 비움
+    }
+  }
   await room.save();
 
   user.joinedRooms = user.joinedRooms.filter(

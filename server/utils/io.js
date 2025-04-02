@@ -46,6 +46,7 @@ module.exports = function (io) {
       }
     });
 
+    // 콜백 추가
     socket.on("getRooms", async (_, cb) => {
       try {
         const user = await userController.checkUser(socket.id);
