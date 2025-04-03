@@ -38,13 +38,16 @@ roomController.inviteUser = async (roomId, targetUserId) => {
   const user = await User.findById(targetUserId);
   if (!room || !user) throw new Error("Room or user not found");
 
+  // 이미 members에 포함되어 있지 않은 경우만 추가
   if (!room.members.includes(user._id)) {
     room.members.push(user._id);
     await room.save();
   }
 
-  if (!user.joinedRooms.includes(room._id)) {
-    user.joinedRooms.push(room._id);
+  // 유저가 아직 해당 방에 없으면 joinedRooms에 추가
+  const alreadyJoined = user.joinedRooms.some((r) => r.room.toString() === roomId.toString());
+  if (!alreadyJoined) {
+    user.joinedRooms.push({ room: room._id, joinedAt: new Date() });
     await user.save();
   }
 };

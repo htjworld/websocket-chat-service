@@ -2,6 +2,7 @@ const chatController = require("../Controllers/chat.controller");
 const userController = require("../Controllers/user.controller");
 const Chat = require("../Models/chat");
 const User = require("../Models/user");
+const Room = require("../Models/room");
 const roomController = require("../Controllers/room.controller");
 
 
@@ -121,6 +122,32 @@ module.exports = function (io) {
         }).sort({ createdAt: 1 });
 
         cb({ ok: true, chats });
+      } catch (err) {
+        cb({ ok: false, message: err.message });
+      }
+    });
+
+    socket.on("inviteUser", async ({ roomId, targetUserId }, cb) => {
+      try {
+        const user = await userController.checkUser(socket.id);
+        const room = await Room.findById(roomId);
+    
+        // 방장만 초대 가능
+        if (room.admin.toString() !== user._id.toString()) {
+          return cb({ ok: false, message: "Only admin can invite users" });
+        }
+    
+        await roomController.inviteUser(roomId, targetUserId);
+        io.emit("rooms", await roomController.getAllRooms()); // 목록 최신화
+        cb({ ok: true });
+      } catch (err) {
+        cb({ ok: false, message: err.message });
+      }
+    });
+    socket.on("getAllUsers", async (_, cb) => {
+      try {
+        const users = await User.find({}, "_id name"); // 전체 유저 목록 name, _id만
+        cb({ ok: true, users });
       } catch (err) {
         cb({ ok: false, message: err.message });
       }
