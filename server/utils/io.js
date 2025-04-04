@@ -132,7 +132,10 @@ module.exports = function (io) {
         const user = await userController.checkUser(socket.id);
         const room = await Room.findById(roomId);
         if (!room) throw new Error("Room not found");
-    
+        
+        if (room.admin.toString() !== user._id.toString()) {
+          return cb({ ok: false, message: "방장만 유저를 초대할 수 있습니다." });
+        }
         const invitedNames = [];
     
         for (const targetUserId of userIds) {
