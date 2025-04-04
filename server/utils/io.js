@@ -127,21 +127,34 @@ module.exports = function (io) {
       }
     });
 
-    socket.on("inviteUser", async ({ roomId, targetUserId }, cb) => {
+    socket.on("inviteUsers", async ({ roomId, userIds }, cb) => {
       try {
         const user = await userController.checkUser(socket.id);
         const room = await Room.findById(roomId);
+        if (!room) throw new Error("Room not found");
     
-        // 방장만 초대 가능
-        if (room.admin.toString() !== user._id.toString()) {
-          return cb({ ok: false, message: "Only admin can invite users" });
+        const invitedNames = [];
+    
+        for (const targetUserId of userIds) {
+          await roomController.inviteUser(roomId, targetUserId);
+          const invitedUser = await User.findById(targetUserId);
+          invitedNames.push(invitedUser.name);
         }
     
-        await roomController.inviteUser(roomId, targetUserId);
         const updatedMembers = await roomController.getRoomMembers(roomId);
-
+    
         io.to(roomId).emit("membersUpdated", updatedMembers);
-        io.emit("rooms", await roomController.getAllRooms()); // 목록 최신화
+    
+        // 초대한 유저 이름 리스트로 시스템 메시지 전송
+        if (invitedNames.length > 0) {
+          const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+          const systemMessage = {
+            chat: `${invitedNames.join(", ")}님이 입장했습니다. (${now})`,
+            user: { id: null, name: "system" },
+          };
+          io.to(roomId).emit("message", systemMessage);
+        }
+    
         cb({ ok: true });
       } catch (err) {
         cb({ ok: false, message: err.message });

@@ -28,12 +28,17 @@ const InvitePanel = ({ isOpen, roomId, members, onClose, socket }) => {
   };
 
   const handleInvite = () => {
-    selected.forEach((userId) => {
-      socket.emit("inviteUser", { roomId, targetUserId: userId }, (res) => {
-        if (!res.ok) alert(`${userId} 초대 실패: ${res.message}`);
-      });
+    if (selected.length === 0) return alert("한 명 이상 선택해주세요!");
+  
+    socket.emit("inviteUsers", { roomId, userIds: selected }, (res) => {
+      if (res.ok) {
+        alert("유저를 성공적으로 초대했습니다!");
+        setSelected([]);
+        onClose();
+      } else {
+        alert(`초대 실패: ${res.message}`);
+      }
     });
-    onClose(); // 닫기
   };
 
   const filteredUsers = allUsers.filter((user) =>

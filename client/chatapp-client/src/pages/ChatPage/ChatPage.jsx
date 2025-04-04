@@ -128,16 +128,16 @@ const ChatPage = ({ user }) => {
   };
 
   const handleInvite = () => {
-    const invites = selectedUsers.map(
-      (userId) =>
-        new Promise((resolve) => {
-          socket.emit("inviteUser", { roomId: id, targetUserId: userId }, (res) => resolve(res));
-        })
-    );
+    console.log("🔥 handleInvite called with:", selectedUsers); // 이거 추가
 
-    Promise.all(invites).then(() => {
-      setSelectedUsers([]);
-      setInvitePanelOpen(false);
+    socket.emit("inviteUsers", { roomId: id, userIds: selectedUsers }, (res) => {
+      if (res.ok) {
+        alert("유저를 성공적으로 초대했습니다!");
+        setInvitePanelOpen(false);
+        setSelectedUsers([]);
+      } else {
+        alert("초대에 실패했습니다.");
+      }
     });
   };
 
