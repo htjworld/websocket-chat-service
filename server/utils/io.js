@@ -15,10 +15,19 @@ module.exports = function (io) {
     socket.on("login", async (userName, cb) => {
       //유저 정보를 저장
       try {
-        const user = await userController.saveUser(userName, socket.id);
+        const { user, notifyUsers } = await userController.saveUser(userName, socket.id);
+        socket.join(user.token);
+
+        // 기존 전체공지방 유저들에게만 roomsUpdated 전송
+        for (const target of notifyUsers) {
+          if (target.token) {
+            io.to(target.token).emit("roomsUpdated");
+          }
+        }
+
         const userRooms = await roomController.getUserRooms(user._id);
-        socket.emit("rooms", userRooms);
-        cb({ ok: true, data: user });
+        // socket.emit("rooms", userRooms);
+        cb({ ok: true, data: user , rooms:userRooms});
       } catch (error) {
         cb({ ok: false, error: error.message });        
       }
@@ -85,8 +94,7 @@ module.exports = function (io) {
       try {
         const user = await userController.checkUser(socket.id);
         const roomId = socket.currentRoom;
-        console.log("🧩 LeaveRoom - user:", user);
-        console.log("🧩 LeaveRoom - roomId:", roomId);
+
         if (!roomId) throw new Error("현재 방 정보가 없습니다.");
 
         await roomController.leaveRoom(user._id, roomId);
@@ -97,9 +105,23 @@ module.exports = function (io) {
           type: "system",
         };
         await Chat.create(leaveMessage);
-        socket.broadcast.to(roomId.toString()).emit("message", leaveMessage); // socket.broadcast의 경우 io.to()와 달리,나를 제외한 채팅방에 모든 맴버에게 메세지를 보낸다 
+        socket.broadcast.to(roomId.toString()).emit("message", leaveMessage); 
+        // socket.broadcast의 경우 io.to()와 달리,나를 제외한 채팅방에 모든 맴버에게 메세지를 보낸다 
         const userRooms = await roomController.getUserRooms(user._id);
         socket.emit("rooms", userRooms); // 본인에게만
+
+        const updatedMembers = await roomController.getRoomMembers(roomId);
+        io.to(roomId).emit("membersUpdated", updatedMembers);
+
+        // 본인 제외 후 roomsUpdated 전송
+        for (const member of updatedMembers) {
+          if (member._id.toString() !== user._id.toString()) {
+            const targetUser = await User.findById(member._id);
+            if (targetUser?.token) {
+              io.to(targetUser.token).emit("roomsUpdated");
+            }
+          }
+        }
 
         socket.leave(roomId.toString()); // join했던 방을 떠남 
         cb({ ok: true });
@@ -148,11 +170,24 @@ module.exports = function (io) {
         for (const targetUserId of userIds) {
           await roomController.inviteUser(roomId, targetUserId);
           const invitedUser = await User.findById(targetUserId);
+          
+          // 초대된 유저에게 roomsUpdated 이벤트 발송
+          if (invitedUser.token) {
+            io.to(invitedUser.token).emit("roomsUpdated");
+          }
           invitedNames.push(invitedUser.name);
         }
     
         const updatedMembers = await roomController.getRoomMembers(roomId);
-    
+        
+        // 방 전체 멤버에게 roomsUpdated 전송
+        for (const member of updatedMembers) {
+          const target = await User.findById(member._id);
+          if (target?.token) {
+            io.to(target.token).emit("roomsUpdated");
+          }
+        }
+
         io.to(roomId).emit("membersUpdated", updatedMembers);
     
         // 초대한 유저 이름 리스트로 시스템 메시지 전송

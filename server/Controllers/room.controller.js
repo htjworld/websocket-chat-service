@@ -9,9 +9,15 @@ const roomController = {};
 // };
 
 roomController.getUserRooms = async (userId) => {
-  const user = await User.findById(userId).populate("joinedRooms.room");
+  const user = await User.findById(userId).populate({
+    path: "joinedRooms.room",
+    populate: {
+      path: "members",
+      select: "name _id",
+    },
+  });
   if (!user) throw new Error("User not found");
-  const populatedRooms = user.joinedRooms.map((jr)=>jr.room);
+  const populatedRooms = user.joinedRooms.map((jr) => jr.room);
   return populatedRooms;
 };
 
