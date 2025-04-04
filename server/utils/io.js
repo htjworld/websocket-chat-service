@@ -138,6 +138,9 @@ module.exports = function (io) {
         }
     
         await roomController.inviteUser(roomId, targetUserId);
+        const updatedMembers = await roomController.getRoomMembers(roomId);
+
+        io.to(roomId).emit("membersUpdated", updatedMembers);
         io.emit("rooms", await roomController.getAllRooms()); // 목록 최신화
         cb({ ok: true });
       } catch (err) {

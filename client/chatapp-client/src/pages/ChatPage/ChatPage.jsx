@@ -38,14 +38,9 @@ const ChatPage = ({ user }) => {
   useEffect(() => {
     socket.emit("joinRoom", id, (res) => {
       if (res && res.ok) {
-        console.log("successfully join", res);
-        console.log("✅ members from joinRoom:", res.members); // 추가
-
         setMembers(res.members)
         // 기존 메시지 받아오기
         socket.emit("getRoomChats", id, (res) => {
-          console.log("📦 getRoomChats 응답:", res);
-
           if (res.ok) {
             setMessageList(res.chats);
           } else {
@@ -61,6 +56,7 @@ const ChatPage = ({ user }) => {
       setMessageList((prevState) => prevState.concat(res));
     });
 
+    
     socket.emit("getAllUsers", null, (res) => {
       if (res.ok) {
         const inviteCandidates = res.users.filter(
@@ -72,9 +68,25 @@ const ChatPage = ({ user }) => {
       }
     });
 
+    socket.on("membersUpdated", (updated) => {
+      setMembers(updated); // ✅ ChatSidePanel 멤버 목록 갱신
+  
+      // ✅ 초대 대상 리스트도 갱신
+      socket.emit("getAllUsers", null, (res) => {
+        if (res.ok) {
+          const inviteCandidates = res.users.filter(
+            (u) =>
+              !updated.some((m) => m._id === u._id) && u._id !== user._id
+          );
+          setAllUsers(inviteCandidates);
+        }
+      });
+    });
+
     // 클린업 (중복 방지)
     return () => {
       socket.off("message");
+      socket.off("membersUpdated");
     };
   }, [id]);
 
@@ -87,13 +99,7 @@ const ChatPage = ({ user }) => {
       setMessage("");
     });
   };
-  // socket.emit("getRoomMembers", id, (res) => {
-  //   if (res.ok) {
-  //     setMembers(res.members);
-  //   } else {
-  //     console.error("멤버 가져오기 실패:", res.message);
-  //   }
-  // });
+
 
   const leaveRoom = () => {
     const confirmLeave = window.confirm("정말 이 방에서 나가시겠습니까?");
@@ -122,17 +128,19 @@ const ChatPage = ({ user }) => {
   };
 
   const handleInvite = () => {
-    socket.emit("inviteUsers", { roomId: id, userIds: selectedUsers }, (res) => {
-      if (res.ok) {
-        alert("유저를 성공적으로 초대했습니다!");
-        setInvitePanelOpen(false);
-        setSelectedUsers([]);
-        setMembers(res.updatedMembers); // 서버에서 최신 members 보내도록 구현해두면 좋음
-      } else {
-        alert("초대에 실패했습니다.");
-      }
+    const invites = selectedUsers.map(
+      (userId) =>
+        new Promise((resolve) => {
+          socket.emit("inviteUser", { roomId: id, targetUserId: userId }, (res) => resolve(res));
+        })
+    );
+
+    Promise.all(invites).then(() => {
+      setSelectedUsers([]);
+      setInvitePanelOpen(false);
     });
   };
+
   const toggleSelectUser = (userId) => {
     setSelectedUsers((prev) =>
       prev.includes(userId)
