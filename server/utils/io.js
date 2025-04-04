@@ -52,12 +52,13 @@ module.exports = function (io) {
     socket.on("getRooms", async (_, cb) => {
       try {
         const user = await userController.checkUser(socket.id);
-        const userRooms = await roomController.getUserRooms(user._id); // 유저가 속한 방만 가져오기
-        socket.emit("rooms", userRooms); // 다시 프론트에 방 목록 전송
-        if (cb) cb(userRooms);
+        if (!user) return cb({ ok: false, message: "로그인 필요" });
+    
+        const userRooms = await roomController.getUserRooms(user._id);
+        socket.emit("rooms", userRooms);
+        if (cb) cb({ ok: true, data: userRooms });
       } catch (error) {
-        console.error("getRooms error:", error.message);
-        if (cb) cb([]);
+        cb({ ok: false, message: error.message });
       }
     });
 

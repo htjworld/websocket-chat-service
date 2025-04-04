@@ -122,8 +122,18 @@ const ChatPage = ({ user }) => {
   };
 
   const backToList = () => {
-    socket.emit("getRooms", null, () => {
-      navigate("/");
+    if (!user) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+  
+    socket.emit("getRooms", null, (res) => {
+      if (res?.ok) {
+        navigate("/");
+      } else {
+        alert("방 목록 불러오기 실패");
+        // navigate("/"); //다시 로그인화면
+      }
     });
   };
 
