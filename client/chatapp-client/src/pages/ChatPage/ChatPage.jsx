@@ -22,7 +22,15 @@ const ChatPage = ({ user }) => {
   const { id } = useParams(); // 유저가 조인한 방의 아이디를 url에서 가져온다.
 
   const navigate = useNavigate();
-  const togglePanel = () => setIsPanelOpen(!isPanelOpen);
+  const togglePanel = () => {
+    const willClose = isPanelOpen; // 이미 열려있는 상태에서 누르면 닫히니까
+    setIsPanelOpen(!isPanelOpen);
+  
+    if (willClose) {
+      // 패널 닫히는 상황이면 초대창도 같이 닫기
+      setInvitePanelOpen(false);
+    }
+  };
   const toggleInvitePanel = () => {
     setInvitePanelOpen(!invitePanelOpen);
   };

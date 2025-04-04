@@ -53,16 +53,16 @@ const InvitePanel = ({ isOpen, roomId, members, onClose, socket }) => {
       />
       <ul className="invite-user-list">
         {filteredUsers.map((user) => (
-          <li key={user._id}>
-            <label>
-              <input
+          <li key={user._id} className="invite-user-item">
+            <label className="invite-user-label">
+            <input
                 type="checkbox"
                 checked={selected.includes(user._id)}
                 onChange={() => toggleSelect(user._id)}
-              />
-              {user.name}
+            />
+            <span className="invite-user-name">{user.name}</span>
             </label>
-          </li>
+        </li>
         ))}
       </ul>
       <div className="invite-buttons">
