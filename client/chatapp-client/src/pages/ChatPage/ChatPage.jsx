@@ -137,27 +137,6 @@ const ChatPage = ({ user }) => {
     });
   };
 
-  const handleInvite = () => {
-    console.log("🔥 handleInvite called with:", selectedUsers); // 이거 추가
-
-    socket.emit("inviteUsers", { roomId: id, userIds: selectedUsers }, (res) => {
-      if (res.ok) {
-        alert("유저를 성공적으로 초대했습니다!");
-        setInvitePanelOpen(false);
-        setSelectedUsers([]);
-      } else {
-        alert("초대에 실패했습니다.");
-      }
-    });
-  };
-
-  const toggleSelectUser = (userId) => {
-    setSelectedUsers((prev) =>
-      prev.includes(userId)
-        ? prev.filter((id) => id !== userId)
-        : [...prev, userId]
-    );
-  };
 
   return (
     <div>
