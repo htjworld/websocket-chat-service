@@ -9,7 +9,6 @@ const roomController = require("../Controllers/room.controller");
 module.exports = function (io) {
   //io~~ => emit:듣는것, on:말하기
   io.on("connection", async (socket) => {
-    socket.emit("rooms", await roomController.getAllRooms()); // 룸 리스트 보내기
 
     console.log("client is connected", socket.id);
 
@@ -34,13 +33,15 @@ module.exports = function (io) {
         socket.currentRoom = rid; // 현재 방 저장
 
         const members = await roomController.getRoomMembers(rid);
+        const userRooms = await roomController.getUserRooms(user._id);
+
 
         // const welcomeMessage = {
         //   chat: `${user.name} is joined to this room`,
         //   user: { id: null, name: "system" },
         // };
         // io.to(rid).emit("message", welcomeMessage); // 해당 방에만 전송
-        io.emit("rooms", await roomController.getAllRooms());// 5 작업
+        socket.emit("rooms", userRooms); // 본인에게만
         cb({ ok: true, members });
       } catch (error) {
         cb({ ok: false, error: error.message });
@@ -96,7 +97,9 @@ module.exports = function (io) {
         };
         await Chat.create(leaveMessage);
         socket.broadcast.to(roomId.toString()).emit("message", leaveMessage); // socket.broadcast의 경우 io.to()와 달리,나를 제외한 채팅방에 모든 맴버에게 메세지를 보낸다 
-        io.emit("rooms", await roomController.getAllRooms());
+        const userRooms = await roomController.getUserRooms(user._id);
+        socket.emit("rooms", userRooms); // 본인에게만
+
         socket.leave(roomId.toString()); // join했던 방을 떠남 
         cb({ ok: true });
       } catch (error) {

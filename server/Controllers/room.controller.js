@@ -3,10 +3,10 @@ const User = require("../Models/user");
 
 const roomController = {};
 
-roomController.getAllRooms = async () => {
-  const roomList = await Room.find({}).populate("members", "name");
-  return roomList;
-};
+// roomController.getAllRooms = async () => {
+//   const roomList = await Room.find({}).populate("members", "name");
+//   return roomList;
+// };
 
 roomController.getUserRooms = async (userId) => {
   const user = await User.findById(userId).populate("joinedRooms.room");
