@@ -177,10 +177,12 @@ const ChatPage = ({ user }) => {
             socket={socket}
           />
 
-        <div>
+        <div className = "chat-scroll-area">
+          <div className="scroll-top-space" />
           {messageList.length > 0 ? (
             <MessageContainer messageList={messageList} user={user} />
           ) : null}
+          <div className="scroll-bottom-space" />
         </div>
         <InputField
           message={message}
