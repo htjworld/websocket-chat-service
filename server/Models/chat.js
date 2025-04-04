@@ -14,6 +14,11 @@ const chatSchema = new mongoose.Schema(
       type: mongoose.Schema.ObjectId,
       ref: "Room",
     },
+    type: {
+      type: String,
+      enum: ["user", "system"],
+      default: "user",
+    },
   },
   { timestamps: true }
 );

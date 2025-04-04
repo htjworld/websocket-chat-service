@@ -6,7 +6,7 @@ const MessageContainer = ({ messageList, user }) => {
   return (
     <div>
       {messageList.map((message, index) => {
-        const isSystem = message.user.name === "system";
+        const isSystem = message.type === "system";
         const isMyMessage = message.user.name === user.name;
         const prevMessage = messageList[index - 1];
         const isFirstMessage = index === 0;
