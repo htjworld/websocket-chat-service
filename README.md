@@ -4,6 +4,11 @@ A full-stack real-time messenger app using Socket.IO, MongoDB, and React, with a
 실시간 채팅, 유저 초대, 방 관리 기능을 포함한 **카카오톡 스타일 UI**의 **풀스택 웹소켓 기반 메신저 프로젝트**입니다.
 
 ---
+🎬 **Demo Video**
+
+https://github.com/user-attachments/assets/f306b0c1-e394-411d-888b-35a6f3187c4e
+> 실시간 채팅 흐름, 방 생성/초대/나가기 기능, 방장 권한 이동 방식 시연
+---
 
 ## 📌 Features
 
@@ -106,6 +111,11 @@ client/chatapp-client/src
 
 ## 💡 How to Run
 
+```bash
+# 먼저 백엔드(포트 5001)를 실행해 전체 공지방을 생성해야 합니다.
+# 이후 프론트엔드(포트 3000)를 실행합니다.
+```
+
 ### Backend
 
 ```bash
@@ -121,5 +131,3 @@ cd client/chatapp-client
 npm install  # 최초 1회만 실행
 npm start
 ```
-
-.env 설정이나 DB URI가 필요할 경우 따로 환경변수를 설정해주세요.
